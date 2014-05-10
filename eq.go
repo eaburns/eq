@@ -12,12 +12,15 @@ import (
 // Deep panics if given a channel, function, map, or unsafe pointer types.
 func Deep(u, v interface{}) bool {
 	if u == nil || v == nil {
-		return (u == nil) == (v == nil)
+		return u == v
 	}
 	return eq(reflect.ValueOf(u), reflect.ValueOf(v))
 }
 
 func eq(u, v reflect.Value) bool {
+	if !u.IsValid() || !v.IsValid() {
+		return u.IsValid() == v.IsValid()
+	}
 	if u.Type() != v.Type() {
 		return false
 	}

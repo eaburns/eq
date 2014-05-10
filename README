@@ -1,0 +1,1 @@
+Package eq defines a deep equality function that ignores unexported struct fields.

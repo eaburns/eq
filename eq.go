@@ -3,8 +3,6 @@ package eq
 
 import (
 	"reflect"
-	"unicode"
-	"unicode/utf8"
 )
 
 // Returns true if u are equals (==) v, ignoring unexported struct fields.
@@ -65,7 +63,7 @@ func eq(u, v reflect.Value) bool {
 		t := u.Type()
 		for i := 0; i < t.NumField(); i++ {
 			f := t.Field(i)
-			if exported(f.Name) && !eq(u.Field(i), v.Field(i)) {
+			if exported(&f) && !eq(u.Field(i), v.Field(i)) {
 				return false
 			}
 		}
@@ -78,10 +76,6 @@ func eq(u, v reflect.Value) bool {
 	}
 }
 
-func exported(n string) bool {
-	if len(n) == 0 {
-		return true
-	}
-	r, _ := utf8.DecodeRuneInString(n)
-	return unicode.IsUpper(r)
+func exported(f *reflect.StructField) bool {
+	return len(f.PkgPath) == 0
 }

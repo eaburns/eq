@@ -5,6 +5,12 @@ import (
 	"reflect"
 )
 
+// The Eqer interface allows types to override the equality used by eq.
+type Eqer interface {
+	// Eq returns whether the values are equal.
+	Eq(interface{}) bool
+}
+
 // Returns true if u are equals (==) v, ignoring unexported struct fields.
 //
 // Deep panics if given a channel, function, map, or unsafe pointer types.
@@ -21,6 +27,9 @@ func eq(u, v reflect.Value) bool {
 	}
 	if u.Type() != v.Type() {
 		return false
+	}
+	if eqer, ok := u.Interface().(Eqer); ok {
+		return eqer.Eq(v.Interface())
 	}
 
 	switch v.Kind() {

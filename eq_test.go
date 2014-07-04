@@ -1,10 +1,8 @@
 package eq
 
 import (
-	"bytes"
+	"math/big"
 	"testing"
-
-	"github.com/eaburns/pp"
 )
 
 type s struct {
@@ -13,6 +11,13 @@ type s struct {
 
 type i struct {
 	X interface{}
+}
+
+type bigInt struct{ *big.Int }
+
+func (a bigInt) Eq(c interface{}) bool {
+	b, ok := c.(bigInt)
+	return ok && a.Cmp(b.Int) == 0
 }
 
 func TestDeep(t *testing.T) {
@@ -79,22 +84,15 @@ func TestDeep(t *testing.T) {
 		{i{0}, i{1}, false},
 		{i{i{0}}, i{i{1}}, false},
 
-		// Different types
+		{bigInt{big.NewInt(5)}, bigInt{big.NewInt(5)}, true},
+		{bigInt{big.NewInt(5)}, bigInt{big.NewInt(6)}, false},
 	}
 	for _, test := range tests {
 		eq := Deep(test.u, test.v)
 		if eq == test.eq {
 			continue
 		}
-		t.Errorf("expected ExportedDeepEqual(\n%s,\n%s\n) == %t, got %t",
-			str(&test.u), str(&test.v), test.eq, eq)
+		t.Errorf("expected ExportedDeepEqual(\n%v,\n%v\n) == %t, got %t",
+			test.u, test.v, test.eq, eq)
 	}
-}
-
-func str(u interface{}) string {
-	buf := bytes.NewBuffer(nil)
-	if err := pp.Print(buf, u); err != nil {
-		panic(err)
-	}
-	return buf.String()
 }
